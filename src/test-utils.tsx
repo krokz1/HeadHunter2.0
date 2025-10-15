@@ -20,9 +20,7 @@ class IntersectionObserverMock {
   readonly thresholds: readonly number[] = [];
   callback: IntersectionObserverCallback;
 
-  constructor(
-    callback: IntersectionObserverCallback,
-  ) {
+  constructor(callback: IntersectionObserverCallback) {
     this.callback = callback;
   }
 

@@ -19,9 +19,11 @@ export interface IVacancy {
     name: string;
   };
   alternate_url: string;
-  snippet: {
-    requirement: string;
-    responsibility: string;
+  description?: string;
+  branded_description?: string;
+  snippet?: {
+    requirement?: string;
+    responsibility?: string;
   };
   schedule?: {
     name: string;

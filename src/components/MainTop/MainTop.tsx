@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, Group, TextInput, Title } from "@mantine/core";
+import { useSearchParams } from "react-router-dom";
 import { useAppDispatch } from "../../hooks/redux";
 import {
-  setSearchParams,
+  setSearchParams as setReduxSearchParams,
   fetchVacancies,
 } from "../../store/slices/vacanciesSlice";
 import { SearchIcon } from "../../assets/icons/SearchIcon";
@@ -11,9 +12,25 @@ import styles from "./MainTop.module.scss";
 export function MainTop() {
   const dispatch = useAppDispatch();
   const [searchText, setSearchText] = useState("");
+  const [searchParams, setUrlSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const textParam = searchParams.get("text");
+    if (textParam) {
+      setSearchText(textParam);
+    }
+  }, [searchParams]);
 
   const handleSearch = () => {
-    dispatch(setSearchParams({ text: searchText }));
+    const newParams = new URLSearchParams(searchParams);
+    if (searchText) {
+      newParams.set("text", searchText);
+    } else {
+      newParams.delete("text");
+    }
+    setUrlSearchParams(newParams);
+
+    dispatch(setReduxSearchParams({ text: searchText }));
     dispatch(
       fetchVacancies({
         text: searchText,

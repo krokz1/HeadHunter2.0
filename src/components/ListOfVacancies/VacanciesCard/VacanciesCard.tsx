@@ -1,5 +1,6 @@
 import { Card, Group, Text, Button, Title, Badge } from "@mantine/core";
 import type { IVacancy } from "../../../types";
+import { Link } from "react-router-dom";
 import styles from "./VacanciesCard.module.scss";
 
 interface VacanciesCardProps {
@@ -84,7 +85,11 @@ export function VacanciesCard({ vacancy }: VacanciesCardProps) {
       </Text>
 
       <Group className={styles.vacanciesCardButtonContainer}>
-        <Button className={styles.vacanciesCardButtonLook}>
+        <Button
+          className={styles.vacanciesCardButtonLook}
+          component={Link}
+          to={`/vacancies/${vacancy.id}`}
+        >
           Смотреть вакансию
         </Button>
         <Button

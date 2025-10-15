@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { TextInput, ActionIcon, Text, Select, Pill } from "@mantine/core";
 import { useAppDispatch } from "../../hooks/redux";
 import {
-  setSearchParams,
+  setSearchParams as setReduxSearchParams,
   fetchVacancies,
 } from "../../store/slices/vacanciesSlice";
 import { IconPlus, IconMapPin } from "@tabler/icons-react";
@@ -17,19 +18,46 @@ export function SkillsInput() {
     "Redux",
   ]);
   const [selectedCity, setSelectedCity] = useState<string | null>("");
+  const [searchParams, setUrlSearchParams] = useSearchParams();
 
   const cities = [
     { value: "", label: "Все города" },
     { value: "1", label: "Москва" },
     { value: "2", label: "Санкт-Петербург" },
   ];
+
+  useEffect(() => {
+    const areaParam = searchParams.get("area");
+    const skillsParams = searchParams.getAll("skill_set");
+
+    if (areaParam) setSelectedCity(areaParam);
+    if (skillsParams.length > 0) setSkills(skillsParams);
+  }, [searchParams]);
+
+  const updateURLParams = (newSkills: string[], city: string | null) => {
+    const newParams = new URLSearchParams(searchParams);
+
+    newParams.delete("skill_set");
+    newSkills.forEach((skill) => newParams.append("skill_set", skill));
+
+    if (city) {
+      newParams.set("area", city);
+    } else {
+      newParams.delete("area");
+    }
+
+    setUrlSearchParams(newParams);
+  };
+
   const addSkill = () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
       const updatedSkills = [...skills, newSkill.trim()];
       setSkills(updatedSkills);
       setNewSkill("");
 
-      dispatch(setSearchParams({ skill_set: updatedSkills }));
+      updateURLParams(updatedSkills, selectedCity);
+
+      dispatch(setReduxSearchParams({ skill_set: updatedSkills }));
       dispatch(
         fetchVacancies({
           skill_set: updatedSkills,
@@ -45,7 +73,9 @@ export function SkillsInput() {
     const updatedSkills = skills.filter((skill) => skill !== skillToRemove);
     setSkills(updatedSkills);
 
-    dispatch(setSearchParams({ skill_set: updatedSkills }));
+    updateURLParams(updatedSkills, selectedCity);
+
+    dispatch(setReduxSearchParams({ skill_set: updatedSkills }));
     dispatch(
       fetchVacancies({
         skill_set: updatedSkills,
@@ -59,8 +89,10 @@ export function SkillsInput() {
   const handleCityChange = (value: string | null) => {
     setSelectedCity(value);
 
+    updateURLParams(skills, value);
+
     const areaValue = value || "";
-    dispatch(setSearchParams({ area: areaValue }));
+    dispatch(setReduxSearchParams({ area: areaValue }));
     dispatch(
       fetchVacancies({
         area: areaValue,
@@ -109,7 +141,6 @@ export function SkillsInput() {
               withRemoveButton
               onRemove={() => removeSkill(skill)}
               className={styles.skillChip}
-              data-testid="skill-pill"
             >
               {skill}
             </Pill>
